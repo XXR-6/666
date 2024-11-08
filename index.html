@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日祝福</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Microsoft YaHei", sans-serif;
+            transition: background 1s ease;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 90%;
+            animation: fadeIn 2s ease;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+        }
+
+        p {
+            line-height: 2;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+
+        .morning {
+            background: linear-gradient(45deg, #ffefba, #ffffff);
+        }
+        .morning h1 { color: #ff8c00; }
+
+        .noon {
+            background: linear-gradient(45deg, #89f7fe, #66a6ff);
+        }
+        .noon h1 { color: #2196f3; }
+
+        .evening {
+            background: linear-gradient(45deg, #a18cd1, #fbc2eb);
+        }
+        .evening h1 { color: #8e44ad; }
+
+        /* 添加图片轮播相关样式 */
+        .image-carousel {
+            width: 100%;
+            max-width: 500px;
+            height: 200px;
+            margin: 1rem auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .carousel-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .carousel-image.active {
+            opacity: 1;
+        }
+
+        /* 添加加载动画 */
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            h1 { font-size: 1.8rem; }
+            p { font-size: 1.2rem; }
+            .image-carousel {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 id="greeting">正在加载...</h1>
+        <div id="icon" class="icon"></div>
+        <!-- 添加图片轮播容器 -->
+        <div class="image-carousel" id="imageCarousel">
+            <div class="loading">图片加载中...</div>
+        </div>
+        <p id="message">正在加载祝福语...</p>
+        <p id="health-tip" style="font-size: 1.2rem; color: #666;"></p>
+    </div>
+
+    <script>
+        // 定义不同时段的图片数组
+        const timeImages = {
+            morning: [
+                "https://img2.baidu.com/it/u=2150193690,2405896648&fm=253&fmt=auto&app=138&f=JPEG",  // 早晨阳光
+                "https://img1.baidu.com/it/u=736028145,1136404818&fm=253&fmt=auto&app=120&f=JPEG",   // 早安祝福
+                "https://img0.baidu.com/it/u=2830607669,1350786778&fm=253&fmt=auto&app=138&f=JPEG"   // 早晨问候
+            ],
+            noon: [
+                "https://img0.baidu.com/it/u=3082010940,1461864302&fm=253&fmt=auto&app=138&f=JPEG",  // 午安祝福
+                "https://img1.baidu.com/it/u=736028145,1136404818&fm=253&fmt=auto&app=120&f=JPEG",   // 阳光午后
+                "https://img2.baidu.com/it/u=1797502582,3761720977&fm=253&fmt=auto&app=138&f=JPEG"   // 午休时光
+            ],
+            evening: [
+                "https://img1.baidu.com/it/u=1797502582,3761720977&fm=253&fmt=auto&app=138&f=JPEG",  // 晚安祝福
+                "https://img2.baidu.com/it/u=2166299806,2226768808&fm=253&fmt=auto&app=138&f=JPEG",  // 温馨晚上
+                "https://img0.baidu.com/it/u=2830607669,1350786778&fm=253&fmt=auto&app=138&f=JPEG"   // 月亮晚安
+            ]
+        };
+
+        let currentImageIndex = 0;
+        let currentImages = [];
+
+        function loadImages(timeOfDay) {
+            const carousel = document.getElementById('imageCarousel');
+            carousel.innerHTML = '<div class="loading">图片加载中...</div>';
+            currentImages = timeImages[timeOfDay];
+            
+            // 创建并加载图片
+            currentImages.forEach((src, index) => {
+                const img = new Image();
+                img.src = src;
+                img.className = `carousel-image ${index === 0 ? 'active' : ''}`;
+                img.alt = '祝福图片';
+                carousel.appendChild(img);
+            });
+        }
+
+        function rotateImages() {
+            const images = document.querySelectorAll('.carousel-image');
+            if (images.length === 0) return;
+
+            images[currentImageIndex].classList.remove('active');
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            images[currentImageIndex].classList.add('active');
+        }
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const body = document.body;
+            const greeting = document.getElementById('greeting');
+            const message = document.getElementById('message');
+            const icon = document.getElementById('icon');
+            const healthTip = document.getElementById('health-tip');
+
+            if (hour >= 5 && hour < 11) {
+                body.className = 'morning';
+                greeting.textContent = '早上好！';
+                icon.textContent = '🌅';
+                message.textContent = '愿您早晨精神好，开开心心一整天！';
+                healthTip.textContent = '温馨提示：早晨记得喝一杯温水，做做健康操哦！';
+                loadImages('morning');
+            } else if (hour >= 11 && hour < 17) {
+                body.className = 'noon';
+                greeting.textContent = '中午好！';
+                icon.textContent = '☀️';
+                message.textContent = '愿您胃口好，休息好，身体倍儿棒！';
+                healthTip.textContent = '温馨提示：中午要适当休息，不要忘记吃午饭哦！';
+                loadImages('noon');
+            } else {
+                body.className = 'evening';
+                greeting.textContent = '晚上好！';
+                icon.textContent = '🌙';
+                message.textContent = '愿您晚上睡得香，做个好梦到天亮！';
+                healthTip.textContent = '温馨提示：晚上早点休息，不要熬夜对身体不好哦！';
+                loadImages('evening');
+            }
+        }
+
+        // 页面加载时更新祝福
+        updateGreeting();
+        
+        // 每分钟检查一次时间
+        setInterval(updateGreeting, 60000);
+
+        // 每5秒轮换一次图片
+        setInterval(rotateImages, 5000);
+    </script>
+</body>
+</html> 
